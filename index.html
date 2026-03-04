@@ -1,0 +1,774 @@
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Addis Ababa · Live Location Tracker</title>
+    <title>Addis Ababa · Live Location & Route Finder</title>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet Routing Machine CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+@@ -23,19 +25,20 @@
+height: 100vh;
+display: flex;
+flex-direction: column;
+            overflow: hidden;
+}
+
+.header {
+background: white;
+            padding: 15px;
+            padding: 12px;
+text-align: center;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+z-index: 1000;
+}
+
+.header h1 {
+color: #2d3748;
+            font-size: 1.5rem;
+            font-size: 1.3rem;
+display: flex;
+align-items: center;
+justify-content: center;
+@@ -49,24 +52,18 @@
+.status-bar {
+background: #4299e1;
+color: white;
+            padding: 8px;
+            padding: 6px;
+text-align: center;
+            font-size: 0.9rem;
+            font-size: 0.85rem;
+font-weight: 500;
+transition: background 0.3s;
+            z-index: 1000;
+}
+
+        .status-bar.warning {
+            background: #ed8936;
+        }
+        
+        .status-bar.error {
+            background: #f56565;
+        }
+        
+        .status-bar.success {
+            background: #48bb78;
+        }
+        .status-bar.warning { background: #ed8936; }
+        .status-bar.error { background: #f56565; }
+        .status-bar.success { background: #48bb78; }
+        .status-bar.route { background: #9f7aea; }
+
+#map {
+flex: 1;
+@@ -76,109 +73,235 @@
+
+.info-panel {
+background: white;
+            padding: 15px;
+            padding: 12px;
+border-radius: 20px 20px 0 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
+z-index: 1000;
+            max-height: 35vh;
+            overflow-y: auto;
+            transition: max-height 0.3s ease;
+        }
+        
+        .info-panel.route-active {
+            max-height: 45vh;
+}
+
+.coordinates {
+display: flex;
+            gap: 15px;
+            gap: 8px;
+justify-content: center;
+            margin-bottom: 15px;
+            margin-bottom: 12px;
+flex-wrap: wrap;
+}
+
+.coord-box {
+background: #f7fafc;
+            padding: 10px 20px;
+            padding: 8px 15px;
+border-radius: 30px;
+border: 2px solid #e2e8f0;
+text-align: center;
+            min-width: 180px;
+            min-width: 150px;
+}
+
+.coord-box .label {
+color: #718096;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            font-size: 0.7rem;
+            margin-bottom: 3px;
+}
+
+.coord-box .value {
+color: #2d3748;
+            font-size: 1.1rem;
+            font-size: 1rem;
+font-weight: 600;
+font-family: monospace;
+}
+
+.accuracy-indicator {
+display: flex;
+align-items: center;
+            gap: 10px;
+            gap: 8px;
+background: #ebf8ff;
+            padding: 10px 20px;
+            padding: 8px 15px;
+border-radius: 30px;
+border: 2px solid #4299e1;
+}
+
+.accuracy-dot {
+            width: 12px;
+            height: 12px;
+            width: 10px;
+            height: 10px;
+border-radius: 50%;
+background: #48bb78;
+animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+100% { opacity: 1; transform: scale(1); }
+}
+
+.accuracy-dot.excellent { background: #48bb78; }
+.accuracy-dot.good { background: #ed8936; }
+.accuracy-dot.poor { background: #f56565; }
+
+        .places-section {
+            margin-top: 20px;
+        .route-info {
+            background: #f0e6ff;
+            border: 2px solid #9f7aea;
+            border-radius: 30px;
+            padding: 10px 20px;
+            margin-bottom: 12px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .route-info.show {
+            display: flex;
+        }
+        
+        .route-details {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .route-detail {
+            text-align: center;
+        }
+        
+        .route-detail .label {
+            color: #553c9a;
+            font-size: 0.7rem;
+}
+
+        .places-section h3 {
+        .route-detail .value {
+            color: #322659;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .clear-route {
+            background: #9f7aea;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .clear-route:hover {
+            background: #805ad5;
+        }
+        
+        .places-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .places-header h3 {
+color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1rem;
+display: flex;
+align-items: center;
+            gap: 10px;
+            gap: 8px;
+        }
+        
+        .places-count {
+            background: #4299e1;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+}
+
+.places-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            max-height: 200px;
+            gap: 8px;
+            max-height: 180px;
+overflow-y: auto;
+            padding: 5px;
+            padding: 3px;
+}
+
+.place-card {
+background: #f7fafc;
+            padding: 12px;
+            padding: 10px;
+border-radius: 10px;
+border: 2px solid #e2e8f0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .place-card:hover {
+            border-color: #4299e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .place-card.selected {
+            border-color: #9f7aea;
+            background: #f0e6ff;
+        }
+        
+        .place-card.routing {
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+        
+        .place-rank {
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            background: #4299e1;
+            color: white;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+}
+
+.place-name {
+font-weight: 600;
+color: #2d3748;
+            margin-bottom: 5px;
+            margin-bottom: 3px;
+            font-size: 0.95rem;
+            padding-left: 15px;
+}
+
+.place-distance {
+color: #48bb78;
+font-weight: 500;
+            font-size: 0.9rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .place-subcity {
+            color: #718096;
+            font-size: 0.75rem;
+            margin-top: 3px;
+        }
+        
+        .route-badge {
+            background: #9f7aea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+}
+
+.loading {
+@@ -200,32 +323,33 @@
+
+.loading-content {
+background: white;
+            padding: 30px;
+            padding: 25px;
+border-radius: 15px;
+text-align: center;
+            max-width: 300px;
+            max-width: 280px;
+}
+
+.loading-content i {
+            font-size: 3rem;
+            font-size: 2.5rem;
+color: #4299e1;
+            margin-bottom: 15px;
+            margin-bottom: 10px;
+}
+
+.loading-content .small {
+            font-size: 0.9rem;
+            font-size: 0.8rem;
+color: #718096;
+            margin-top: 10px;
+            margin-top: 8px;
+}
+
+.error-message {
+background: #fed7d7;
+color: #c53030;
+            padding: 10px;
+            border-radius: 10px;
+            padding: 8px;
+            border-radius: 8px;
+text-align: center;
+            margin: 10px 0;
+            margin: 8px 0;
+display: none;
+            font-size: 0.9rem;
+}
+
+.error-message.show {
+@@ -236,34 +360,30 @@
+background: #4299e1;
+color: white;
+border: none;
+            padding: 12px 20px;
+            padding: 10px 15px;
+border-radius: 30px;
+            font-size: 1rem;
+            font-size: 0.9rem;
+font-weight: 600;
+cursor: pointer;
+width: 100%;
+            margin-top: 10px;
+            margin: 8px 0;
+display: none;
+align-items: center;
+justify-content: center;
+            gap: 10px;
+            gap: 8px;
+}
+
+.manual-button.show {
+display: flex;
+}
+
+        .manual-button:hover {
+            background: #3182ce;
+        }
+        
+.permission-box {
+background: #fffbeb;
+border: 2px solid #f59e0b;
+border-radius: 10px;
+            padding: 20px;
+            padding: 15px;
+text-align: center;
+            margin: 10px 0;
+            margin: 8px 0;
+display: none;
+}
+
+@@ -273,32 +393,38 @@
+
+.permission-box i {
+color: #f59e0b;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+}
+
+.permission-box button {
+background: #f59e0b;
+color: white;
+border: none;
+            padding: 10px 30px;
+            padding: 8px 25px;
+border-radius: 30px;
+            font-size: 1rem;
+            font-size: 0.9rem;
+font-weight: 600;
+cursor: pointer;
+            margin-top: 15px;
+            margin-top: 10px;
+}
+
+.permission-box button:hover {
+background: #d97706;
+}
+        
+        @media (max-width: 480px) {
+            .coord-box { min-width: 120px; }
+            .accuracy-indicator { padding: 8px 10px; }
+            .route-details { gap: 10px; }
+        }
+</style>
+</head>
+<body>
+<div class="header">
+<h1>
+<i class="fas fa-map-marked-alt"></i>
+            Addis Ababa Live Tracker
+            Addis Ababa Route Finder
+</h1>
+</div>
+
+@@ -308,7 +434,7 @@ <h1>
+
+<div id="map"></div>
+
+    <div class="info-panel">
+    <div class="info-panel" id="infoPanel">
+<div class="coordinates">
+<div class="coord-box">
+<div class="label"><i class="fas fa-map-pin"></i> Latitude</div>
+@@ -324,32 +450,51 @@ <h1>
+</div>
+</div>
+
+        <!-- Route Information -->
+        <div class="route-info" id="routeInfo">
+            <div class="route-details">
+                <div class="route-detail">
+                    <div class="label"><i class="fas fa-road"></i> Distance</div>
+                    <div class="value" id="routeDistance">0.0 km</div>
+                </div>
+                <div class="route-detail">
+                    <div class="label"><i class="fas fa-clock"></i> Duration</div>
+                    <div class="value" id="routeTime">0 min</div>
+                </div>
+            </div>
+            <button class="clear-route" onclick="clearRoute()">
+                <i class="fas fa-times"></i> Clear Route
+            </button>
+        </div>
+        
+<div class="error-message" id="errorMessage"></div>
+
+<div class="permission-box" id="permissionBox">
+<i class="fas fa-location-arrow"></i>
+<h3>Location Access Required</h3>
+            <p>Please allow location access to track your position</p>
+            <p>Please allow location access to track your position and find routes</p>
+<button onclick="requestLocationPermission()">
+                <i class="fas fa-check"></i> Allow Location Access
+                <i class="fas fa-check"></i> Allow Access
+</button>
+</div>
+
+<button class="manual-button" id="manualLocationBtn" onclick="requestLocationManually()">
+<i class="fas fa-map-pin"></i> Click to Get Location Manually
+</button>
+
+        <div class="places-section">
+        <div class="places-header">
+<h3>
+<i class="fas fa-building"></i>
+Nearby Places
+                <span style="margin-left: auto; background: #4299e1; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem;" id="placesCount">0</span>
+                <span class="route-badge" id="routeStatus" style="display: none;">Route Active</span>
+</h3>
+            <div class="places-grid" id="placesGrid">
+                <div style="text-align: center; color: #a0aec0; padding: 20px;">
+                    <i class="fas fa-map-pin" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                    <p>Waiting for location...</p>
+                </div>
+            <span class="places-count" id="placesCount">0</span>
+        </div>
+        
+        <div class="places-grid" id="placesGrid">
+            <div style="text-align: center; color: #a0aec0; padding: 15px;">
+                <i class="fas fa-map-pin" style="font-size: 2rem; margin-bottom: 8px;"></i>
+                <p>Waiting for location...</p>
+</div>
+</div>
+</div>
+@@ -363,6 +508,7 @@ <h3>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+<script>
+// ================== CONFIGURATION ==================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlhkF5ePRPms8ZslUbYhKaWVziWusC6RaQNy5MLbWa1vRhH2hLuDtGgHy4FPx_rT8V/exec';
+@@ -375,13 +521,16 @@ <h3>
+
+// ================== GLOBAL VARIABLES ==================
+let map;
+        let routingControl = null;
+let userMarker = null;
+let accuracyCircle = null;
+let locationMarkers = [];
+let allLocations = [];
+let watchId = null;
+let lastLocation = null;
+let locationAttempts = 0;
+        let selectedPlace = null;
+        let currentRoute = null;
+
+// ================== INITIALIZE MAP ==================
+function initMap() {
+@@ -404,6 +553,7 @@ <h3>
+case 'error': return 'exclamation-triangle';
+case 'warning': return 'exclamation-circle';
+case 'success': return 'check-circle';
+                case 'route': return 'route';
+default: return 'satellite';
+}
+}
+@@ -437,6 +587,111 @@ <h3>
+}
+}
+
+        // ================== ROUTE FUNCTIONS ==================
+        function calculateRoute(destLat, destLng, placeName) {
+            if (!lastLocation) {
+                showError('Please wait for location to be available');
+                return;
+            }
+            
+            // Clear existing route
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            
+            updateStatus(`Calculating route to ${placeName}...`, 'route');
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('loadingMessage').textContent = 'Calculating route...';
+            
+            // Store selected place
+            selectedPlace = { lat: destLat, lng: destLng, name: placeName };
+            
+            try {
+                // Create routing control
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(lastLocation.lat, lastLocation.lng),
+                        L.latLng(destLat, destLng)
+                    ],
+                    routeWhileDragging: false,
+                    showAlternatives: true,
+                    fitSelectedRoutes: true,
+                    lineOptions: {
+                        styles: [{ color: '#9f7aea', opacity: 0.8, weight: 6 }]
+                    },
+                    router: L.Routing.osrmv1({
+                        serviceUrl: 'https://router.project-osrm.org/route/v1'
+                    }),
+                    createMarker: function() { return null; } // Prevent duplicate markers
+                }).addTo(map);
+                
+                // Show route info panel
+                document.getElementById('infoPanel').classList.add('route-active');
+                document.getElementById('routeInfo').classList.add('show');
+                document.getElementById('routeStatus').style.display = 'inline-block';
+                
+                // Handle route found
+                routingControl.on('routesfound', function(e) {
+                    const routes = e.routes;
+                    const route = routes[0];
+                    
+                    const distance = (route.summary.totalDistance / 1000).toFixed(1);
+                    const time = Math.round(route.summary.totalTime / 60);
+                    
+                    document.getElementById('routeDistance').textContent = distance + ' km';
+                    document.getElementById('routeTime').textContent = time + ' min';
+                    
+                    updateStatus(`Route found: ${distance} km, ${time} min`, 'success');
+                    document.getElementById('loading').classList.remove('show');
+                    
+                    // Highlight selected place
+                    highlightSelectedPlace(placeName);
+                });
+                
+                // Handle routing error
+                routingControl.on('routingerror', function() {
+                    showError('Could not calculate route. Try another location.');
+                    document.getElementById('loading').classList.remove('show');
+                    clearRoute();
+                });
+                
+            } catch (error) {
+                console.error('Route error:', error);
+                showError('Failed to create route');
+                document.getElementById('loading').classList.remove('show');
+            }
+        }
+        
+        function clearRoute() {
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            
+            document.getElementById('infoPanel').classList.remove('route-active');
+            document.getElementById('routeInfo').classList.remove('show');
+            document.getElementById('routeStatus').style.display = 'none';
+            
+            selectedPlace = null;
+            
+            // Remove highlighting from all place cards
+            document.querySelectorAll('.place-card').forEach(card => {
+                card.classList.remove('selected', 'routing');
+            });
+            
+            updateStatus('Route cleared', 'info');
+        }
+        
+        function highlightSelectedPlace(placeName) {
+            document.querySelectorAll('.place-card').forEach(card => {
+                card.classList.remove('selected', 'routing');
+                if (card.querySelector('.place-name').textContent.includes(placeName)) {
+                    card.classList.add('routing');
+                }
+            });
+        }
+        
+// ================== LOCATION TRACKING ==================
+function checkBrowserSupport() {
+if (!navigator.geolocation) {
+@@ -452,7 +707,6 @@ <h3>
+document.getElementById('loading').classList.add('show');
+document.getElementById('loadingMessage').textContent = 'Requesting location permission...';
+
+            // Try to get location
+navigator.geolocation.getCurrentPosition(
+function(position) {
+document.getElementById('loading').classList.remove('show');
+@@ -595,6 +849,11 @@ <h3>
+
+if (distance > 50) {
+loadNearbyPlaces(lat, lng);
+                    
+                    // If there's an active route, recalculate with new location
+                    if (selectedPlace) {
+                        calculateRoute(selectedPlace.lat, selectedPlace.lng, selectedPlace.name);
+                    }
+}
+}
+
+@@ -639,10 +898,10 @@ <h3>
+distance: calculateDistance(lat, lng, loc.latitude, loc.longitude)
+}));
+
+                // Sort and take nearest 10
+                // Sort and take nearest 15
+const nearest = withDistance
+.sort((a, b) => a.distance - b.distance)
+                    .slice(0, 10);
+                    .slice(0, 15);
+
+// Update markers
+locationMarkers.forEach(m => map.removeLayer(m));
+@@ -653,7 +912,11 @@ <h3>
+marker.bindPopup(`
+                       <b>${i+1}. ${loc.siteName}</b><br>
+                       ${loc.subCity || 'Addis Ababa'}<br>
+                        ${loc.distance.toFixed(2)} km away
+                        ${loc.distance.toFixed(2)} km away<br>
+                        <button onclick="calculateRoute(${loc.latitude}, ${loc.longitude}, '${loc.siteName.replace(/'/g, "\\'")}')" 
+                                style="background:#9f7aea; color:white; border:none; padding:5px 10px; border-radius:5px; margin-top:5px; cursor:pointer;">
+                            <i class="fas fa-route"></i> Get Route
+                        </button>
+                   `);
+locationMarkers.push(marker);
+});
+@@ -662,10 +925,16 @@ <h3>
+const grid = document.getElementById('placesGrid');
+if (nearest.length > 0) {
+grid.innerHTML = nearest.map((loc, i) => `
+                        <div class="place-card">
+                            <div class="place-name">${i+1}. ${loc.siteName}</div>
+                            <div class="place-distance">${loc.distance.toFixed(2)} km</div>
+                            <div style="color: #718096; font-size: 0.8rem;">${loc.subCity || 'Addis Ababa'}</div>
+                        <div class="place-card ${selectedPlace && selectedPlace.name === loc.siteName ? 'selected' : ''}" 
+                             onclick="calculateRoute(${loc.latitude}, ${loc.longitude}, '${loc.siteName.replace(/'/g, "\\'")}')">
+                            <span class="place-rank">${i+1}</span>
+                            <div class="place-name">${loc.siteName}</div>
+                            <div class="place-distance">
+                                <i class="fas fa-location-arrow"></i> ${loc.distance.toFixed(2)} km
+                            </div>
+                            <div class="place-subcity">
+                                <i class="fas fa-map-pin"></i> ${loc.subCity || 'Addis Ababa'}
+                            </div>
+                       </div>
+                   `).join('');
+}
+@@ -699,10 +968,8 @@ <h3>
+const isHttps = location.protocol === 'https:';
+
+if (isLocalhost || isHttps) {
+                // Start tracking automatically
+startLocationTracking();
+} else {
+                // Show HTTPS warning but still try
+updateStatus('For best results, use HTTPS', 'warning');
+startLocationTracking();
+}
+@@ -713,8 +980,6 @@ <h3>
+if (result.state === 'denied') {
+document.getElementById('permissionBox').classList.add('show');
+updateStatus('Location permission denied', 'error');
+                    } else if (result.state === 'prompt') {
+                        // Will prompt automatically
+}
+});
+}
+@@ -726,6 +991,12 @@ <h3>
+navigator.geolocation.clearWatch(watchId);
+}
+};
+        
+        // Make functions global
+        window.calculateRoute = calculateRoute;
+        window.clearRoute = clearRoute;
+        window.requestLocationPermission = requestLocationPermission;
+        window.requestLocationManually = requestLocationManually;
+</script>
+</body>
+</html>
