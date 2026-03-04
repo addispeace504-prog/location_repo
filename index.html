@@ -516,7 +516,7 @@ Nearby Places
 <script>
 // ================== CONFIGURATION ==================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlhkF5ePRPms8ZslUbYhKaWVziWusC6RaQNy5MLbWa1vRhH2hLuDtGgHy4FPx_rT8V/exec';
-const ADDIS_CENTER = [9.0245, 38.7465]; // Center of Addis Ababa
+const ADDIS_CENTER = [9.0245, 38.7465];
 
 // ================== GLOBAL VARIABLES ==================
 let map;
@@ -578,7 +578,6 @@ updateStatus(`Loaded ${data.length} places`, 'success');
 } catch (error) {
 console.error('Failed to load locations:', error);
 updateStatus('Using offline place data', 'warning');
-// Fallback data
 allLocations = [
 { siteName: "Meskel Square", latitude: 9.0108, longitude: 38.7615, subCity: "Kirkos" },
 { siteName: "Bole International Airport", latitude: 8.9779, longitude: 38.7993, subCity: "Bole" },
@@ -600,7 +599,6 @@ showError('Please wait for location to be available');
 return;
 }
 
-// Clear existing route
 if (routingControl) {
 map.removeControl(routingControl);
 routingControl = null;
@@ -610,11 +608,9 @@ updateStatus(`Calculating route to ${placeName}...`, 'route');
 document.getElementById('loading').classList.add('show');
 document.getElementById('loadingMessage').textContent = 'Calculating route...';
 
-// Store selected place
 selectedPlace = { lat: destLat, lng: destLng, name: placeName };
 
 try {
-// Create routing control
 routingControl = L.Routing.control({
 waypoints: [
 L.latLng(lastLocation.lat, lastLocation.lng),
@@ -629,15 +625,13 @@ styles: [{ color: '#9f7aea', opacity: 0.8, weight: 6 }]
 router: L.Routing.osrmv1({
 serviceUrl: 'https://router.project-osrm.org/route/v1'
 }),
-createMarker: function() { return null; } // Prevent duplicate markers
+createMarker: function() { return null; }
 }).addTo(map);
 
-// Show route info panel
 document.getElementById('infoPanel').classList.add('route-active');
 document.getElementById('routeInfo').classList.add('show');
 document.getElementById('routeStatus').style.display = 'inline-block';
 
-// Handle route found
 routingControl.on('routesfound', function(e) {
 const routes = e.routes;
 const route = routes[0];
@@ -651,11 +645,9 @@ document.getElementById('routeTime').textContent = time + ' min';
 updateStatus(`Route found: ${distance} km, ${time} min`, 'success');
 document.getElementById('loading').classList.remove('show');
 
-// Highlight selected place
 highlightSelectedPlace(placeName);
 });
 
-// Handle routing error
 routingControl.on('routingerror', function() {
 showError('Could not calculate route. Try another location.');
 document.getElementById('loading').classList.remove('show');
@@ -681,7 +673,6 @@ document.getElementById('routeStatus').style.display = 'none';
 
 selectedPlace = null;
 
-// Remove highlighting from all place cards
 document.querySelectorAll('.place-card').forEach(card => {
 card.classList.remove('selected', 'routing');
 });
@@ -763,7 +754,6 @@ document.getElementById('latitude').textContent = latitude.toFixed(6);
 document.getElementById('longitude').textContent = longitude.toFixed(6);
 document.getElementById('accuracy').textContent = Math.round(accuracy);
 
-// Update accuracy dot
 const dot = document.getElementById('accuracyDot');
 if (accuracy < 20) dot.className = 'accuracy-dot excellent';
 else if (accuracy < 50) dot.className = 'accuracy-dot good';
@@ -771,7 +761,6 @@ else dot.className = 'accuracy-dot poor';
 
 updateStatus('Location updated', 'success');
 
-// Update or create marker
 if (userMarker) {
 userMarker.setLatLng([latitude, longitude]);
 } else {
@@ -784,7 +773,6 @@ iconSize: [16, 16]
 }).addTo(map);
 }
 
-// Update accuracy circle
 if (accuracyCircle) {
 accuracyCircle.setLatLng([latitude, longitude]);
 accuracyCircle.setRadius(accuracy);
@@ -798,7 +786,6 @@ weight: 2
 }).addTo(map);
 }
 
-// Center map on first location
 if (!lastLocation) {
 map.setView([latitude, longitude], 15);
 }
@@ -809,7 +796,6 @@ lastLocation = { lat: latitude, lng: longitude };
 if (distance > 50) {
 loadNearbyPlaces(latitude, longitude);
 
-// If there's an active route, recalculate with new location
 if (selectedPlace) {
 calculateRoute(selectedPlace.lat, selectedPlace.lng, selectedPlace.name);
 }
@@ -859,12 +845,10 @@ const withDistance = allLocations.map(loc => ({
 distance: calculateDistance(lat, lng, loc.latitude, loc.longitude)
 }));
 
-// Sort and take nearest 15
 const nearest = withDistance
 .sort((a, b) => a.distance - b.distance)
 .slice(0, 15);
 
-// Update markers
 locationMarkers.forEach(m => map.removeLayer(m));
 locationMarkers = [];
 
@@ -889,7 +873,6 @@ style="background:#9f7aea; color:white; border:none; padding:5px 10px; border-ra
 locationMarkers.push(marker);
 });
 
-// Update places grid
 const grid = document.getElementById('placesGrid');
 if (nearest.length > 0) {
 grid.innerHTML = nearest.map((loc, i) => `
@@ -932,7 +915,6 @@ maximumAge: 0
 window.onload = function() {
 initMap();
 
-// Check if we're on localhost or HTTPS
 const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 const isHttps = location.protocol === 'https:';
 
@@ -943,7 +925,6 @@ updateStatus('For best results, use HTTPS', 'warning');
 startLocationTracking();
 }
 
-// Check permission status if available
 if (navigator.permissions && navigator.permissions.query) {
 navigator.permissions.query({ name: 'geolocation' }).then(result => {
 if (result.state === 'denied') {
@@ -954,14 +935,12 @@ updateStatus('Location permission denied', 'error');
 }
 };
 
-// Cleanup on page unload
 window.onbeforeunload = function() {
 if (watchId) {
 navigator.geolocation.clearWatch(watchId);
 }
 };
 
-// Make functions global
 window.calculateRoute = calculateRoute;
 window.clearRoute = clearRoute;
 window.requestLocationPermission = requestLocationPermission;
