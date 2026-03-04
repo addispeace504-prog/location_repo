@@ -1,7 +1,8 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Addis Ababa · Live Location Tracker</title>
     <title>Addis Ababa · Live Location & Route Finder</title>
 
 <!-- Leaflet CSS -->
@@ -11,17 +12,24 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-@@ -23,19 +25,20 @@
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
 height: 100vh;
 display: flex;
 flex-direction: column;
-            overflow: hidden;
+overflow: hidden;
 }
 
 .header {
 background: white;
-            padding: 15px;
-            padding: 12px;
+padding: 12px;
 text-align: center;
 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 z-index: 1000;
@@ -29,95 +37,80 @@ z-index: 1000;
 
 .header h1 {
 color: #2d3748;
-            font-size: 1.5rem;
-            font-size: 1.3rem;
+font-size: 1.3rem;
 display: flex;
 align-items: center;
 justify-content: center;
-@@ -49,24 +52,18 @@
+gap: 8px;
+}
+
+.header i {
+color: #4299e1;
+}
+
 .status-bar {
 background: #4299e1;
 color: white;
-            padding: 8px;
-            padding: 6px;
+padding: 6px;
 text-align: center;
-            font-size: 0.9rem;
-            font-size: 0.85rem;
+font-size: 0.85rem;
 font-weight: 500;
 transition: background 0.3s;
-            z-index: 1000;
+z-index: 1000;
 }
-
-        .status-bar.warning {
-            background: #ed8936;
-        }
-        
-        .status-bar.error {
-            background: #f56565;
-        }
-        
-        .status-bar.success {
-            background: #48bb78;
-        }
-        .status-bar.warning { background: #ed8936; }
-        .status-bar.error { background: #f56565; }
-        .status-bar.success { background: #48bb78; }
-        .status-bar.route { background: #9f7aea; }
+.status-bar.warning { background: #ed8936; }
+.status-bar.error { background: #f56565; }
+.status-bar.success { background: #48bb78; }
+.status-bar.route { background: #9f7aea; }
 
 #map {
 flex: 1;
-@@ -76,109 +73,235 @@
+width: 100%;
+z-index: 1;
+background: #f0f4f8;
+}
 
 .info-panel {
 background: white;
-            padding: 15px;
-            padding: 12px;
+padding: 12px;
 border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
+box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
 z-index: 1000;
-            max-height: 35vh;
-            overflow-y: auto;
-            transition: max-height 0.3s ease;
-        }
-        
-        .info-panel.route-active {
-            max-height: 45vh;
+max-height: 35vh;
+overflow-y: auto;
+transition: max-height 0.3s ease;
+}
+
+.info-panel.route-active {
+max-height: 45vh;
 }
 
 .coordinates {
 display: flex;
-            gap: 15px;
-            gap: 8px;
+gap: 8px;
 justify-content: center;
-            margin-bottom: 15px;
-            margin-bottom: 12px;
+margin-bottom: 12px;
 flex-wrap: wrap;
 }
 
 .coord-box {
 background: #f7fafc;
-            padding: 10px 20px;
-            padding: 8px 15px;
+padding: 8px 15px;
 border-radius: 30px;
 border: 2px solid #e2e8f0;
 text-align: center;
-            min-width: 180px;
-            min-width: 150px;
+min-width: 150px;
 }
 
 .coord-box .label {
 color: #718096;
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-            font-size: 0.7rem;
-            margin-bottom: 3px;
+font-size: 0.7rem;
+margin-bottom: 3px;
 }
 
 .coord-box .value {
 color: #2d3748;
-            font-size: 1.1rem;
-            font-size: 1rem;
+font-size: 1rem;
 font-weight: 600;
 font-family: monospace;
 }
@@ -125,20 +118,16 @@ font-family: monospace;
 .accuracy-indicator {
 display: flex;
 align-items: center;
-            gap: 10px;
-            gap: 8px;
+gap: 8px;
 background: #ebf8ff;
-            padding: 10px 20px;
-            padding: 8px 15px;
+padding: 8px 15px;
 border-radius: 30px;
 border: 2px solid #4299e1;
 }
 
 .accuracy-dot {
-            width: 12px;
-            height: 12px;
-            width: 10px;
-            height: 10px;
+width: 10px;
+height: 10px;
 border-radius: 50%;
 background: #48bb78;
 animation: pulse 2s infinite;
@@ -146,8 +135,7 @@ animation: pulse 2s infinite;
 
 @keyframes pulse {
 0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+50% { opacity: 0.5; transform: scale(1.2); }
 100% { opacity: 1; transform: scale(1); }
 }
 
@@ -155,348 +143,342 @@ animation: pulse 2s infinite;
 .accuracy-dot.good { background: #ed8936; }
 .accuracy-dot.poor { background: #f56565; }
 
-        .places-section {
-            margin-top: 20px;
-        .route-info {
-            background: #f0e6ff;
-            border: 2px solid #9f7aea;
-            border-radius: 30px;
-            padding: 10px 20px;
-            margin-bottom: 12px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .route-info.show {
-            display: flex;
-        }
-        
-        .route-details {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .route-detail {
-            text-align: center;
-        }
-        
-        .route-detail .label {
-            color: #553c9a;
-            font-size: 0.7rem;
+.route-info {
+background: #f0e6ff;
+border: 2px solid #9f7aea;
+border-radius: 30px;
+padding: 10px 20px;
+margin-bottom: 12px;
+display: none;
+align-items: center;
+justify-content: space-between;
+flex-wrap: wrap;
+gap: 10px;
 }
 
-        .places-section h3 {
-        .route-detail .value {
-            color: #322659;
-            font-weight: 600;
-            font-size: 1.1rem;
-        }
-        
-        .clear-route {
-            background: #9f7aea;
-            color: white;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .clear-route:hover {
-            background: #805ad5;
-        }
-        
-        .places-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        
-        .places-header h3 {
-color: #2d3748;
-            margin-bottom: 15px;
-            font-size: 1rem;
+.route-info.show {
+display: flex;
+}
+
+.route-details {
+display: flex;
+gap: 20px;
+}
+
+.route-detail {
+text-align: center;
+}
+
+.route-detail .label {
+color: #553c9a;
+font-size: 0.7rem;
+}
+
+.route-detail .value {
+color: #322659;
+font-weight: 600;
+font-size: 1.1rem;
+}
+
+.clear-route {
+background: #9f7aea;
+color: white;
+border: none;
+padding: 5px 15px;
+border-radius: 20px;
+cursor: pointer;
+font-size: 0.9rem;
 display: flex;
 align-items: center;
-            gap: 10px;
-            gap: 8px;
-        }
-        
-        .places-count {
-            background: #4299e1;
-            color: white;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+gap: 5px;
+}
+
+.clear-route:hover {
+background: #805ad5;
+}
+
+.places-header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 12px;
+}
+
+.places-header h3 {
+color: #2d3748;
+font-size: 1rem;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.places-count {
+background: #4299e1;
+color: white;
+padding: 2px 10px;
+border-radius: 20px;
+font-size: 0.8rem;
+}
+
+.route-badge {
+background: #9f7aea;
+color: white;
+padding: 2px 8px;
+border-radius: 12px;
+font-size: 0.7rem;
+margin-left: 5px;
 }
 
 .places-grid {
 display: grid;
 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
-            max-height: 200px;
-            gap: 8px;
-            max-height: 180px;
+gap: 8px;
+max-height: 180px;
 overflow-y: auto;
-            padding: 5px;
-            padding: 3px;
+padding: 3px;
 }
 
 .place-card {
 background: #f7fafc;
-            padding: 12px;
-            padding: 10px;
+padding: 10px;
 border-radius: 10px;
 border: 2px solid #e2e8f0;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-        
-        .place-card:hover {
-            border-color: #4299e1;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .place-card.selected {
-            border-color: #9f7aea;
-            background: #f0e6ff;
-        }
-        
-        .place-card.routing {
-            border-color: #48bb78;
-            background: #f0fff4;
-        }
-        
-        .place-rank {
-            position: absolute;
-            top: -8px;
-            left: -8px;
-            background: #4299e1;
-            color: white;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
+font-size: 0.9rem;
+cursor: pointer;
+transition: all 0.2s;
+position: relative;
+}
+
+.place-card:hover {
+border-color: #4299e1;
+transform: translateY(-2px);
+box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.place-card.selected {
+border-color: #9f7aea;
+background: #f0e6ff;
+}
+
+.place-card.routing {
+border-color: #48bb78;
+background: #f0fff4;
+}
+
+.place-rank {
+position: absolute;
+top: -8px;
+left: -8px;
+background: #4299e1;
+color: white;
+width: 22px;
+height: 22px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.8rem;
+font-weight: bold;
 }
 
 .place-name {
 font-weight: 600;
 color: #2d3748;
-            margin-bottom: 5px;
-            margin-bottom: 3px;
-            font-size: 0.95rem;
-            padding-left: 15px;
+margin-bottom: 3px;
+font-size: 0.95rem;
+padding-left: 15px;
 }
 
 .place-distance {
 color: #48bb78;
 font-weight: 500;
-            font-size: 0.9rem;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .place-subcity {
-            color: #718096;
-            font-size: 0.75rem;
-            margin-top: 3px;
-        }
-        
-        .route-badge {
-            background: #9f7aea;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            margin-left: 5px;
+font-size: 0.85rem;
+display: flex;
+align-items: center;
+gap: 5px;
+}
+
+.place-subcity {
+color: #718096;
+font-size: 0.75rem;
+margin-top: 3px;
 }
 
 .loading {
-@@ -200,32 +323,33 @@
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background: rgba(0,0,0,0.7);
+z-index: 2000;
+justify-content: center;
+align-items: center;
+}
+
+.loading.show {
+display: flex;
+}
 
 .loading-content {
 background: white;
-            padding: 30px;
-            padding: 25px;
+padding: 25px;
 border-radius: 15px;
 text-align: center;
-            max-width: 300px;
-            max-width: 280px;
+max-width: 280px;
 }
 
 .loading-content i {
-            font-size: 3rem;
-            font-size: 2.5rem;
+font-size: 2.5rem;
 color: #4299e1;
-            margin-bottom: 15px;
-            margin-bottom: 10px;
+margin-bottom: 10px;
 }
 
 .loading-content .small {
-            font-size: 0.9rem;
-            font-size: 0.8rem;
+font-size: 0.8rem;
 color: #718096;
-            margin-top: 10px;
-            margin-top: 8px;
+margin-top: 8px;
 }
 
 .error-message {
 background: #fed7d7;
 color: #c53030;
-            padding: 10px;
-            border-radius: 10px;
-            padding: 8px;
-            border-radius: 8px;
+padding: 8px;
+border-radius: 8px;
 text-align: center;
-            margin: 10px 0;
-            margin: 8px 0;
+margin: 8px 0;
 display: none;
-            font-size: 0.9rem;
+font-size: 0.9rem;
 }
 
 .error-message.show {
-@@ -236,34 +360,30 @@
+display: block;
+}
+
+.manual-button {
 background: #4299e1;
 color: white;
 border: none;
-            padding: 12px 20px;
-            padding: 10px 15px;
+padding: 10px 15px;
 border-radius: 30px;
-            font-size: 1rem;
-            font-size: 0.9rem;
+font-size: 0.9rem;
 font-weight: 600;
 cursor: pointer;
 width: 100%;
-            margin-top: 10px;
-            margin: 8px 0;
+margin: 8px 0;
 display: none;
 align-items: center;
 justify-content: center;
-            gap: 10px;
-            gap: 8px;
+gap: 8px;
 }
 
 .manual-button.show {
 display: flex;
 }
 
-        .manual-button:hover {
-            background: #3182ce;
-        }
-        
+.manual-button:hover {
+background: #3182ce;
+}
+
 .permission-box {
 background: #fffbeb;
 border: 2px solid #f59e0b;
 border-radius: 10px;
-            padding: 20px;
-            padding: 15px;
+padding: 15px;
 text-align: center;
-            margin: 10px 0;
-            margin: 8px 0;
+margin: 8px 0;
 display: none;
 }
 
-@@ -273,32 +393,38 @@
+.permission-box.show {
+display: block;
+}
 
 .permission-box i {
 color: #f59e0b;
-            font-size: 2rem;
-            margin-bottom: 10px;
-            font-size: 1.8rem;
-            margin-bottom: 8px;
+font-size: 1.8rem;
+margin-bottom: 8px;
 }
 
 .permission-box button {
 background: #f59e0b;
 color: white;
 border: none;
-            padding: 10px 30px;
-            padding: 8px 25px;
+padding: 8px 25px;
 border-radius: 30px;
-            font-size: 1rem;
-            font-size: 0.9rem;
+font-size: 0.9rem;
 font-weight: 600;
 cursor: pointer;
-            margin-top: 15px;
-            margin-top: 10px;
+margin-top: 10px;
 }
 
 .permission-box button:hover {
 background: #d97706;
 }
-        
-        @media (max-width: 480px) {
-            .coord-box { min-width: 120px; }
-            .accuracy-indicator { padding: 8px 10px; }
-            .route-details { gap: 10px; }
-        }
+
+@media (max-width: 480px) {
+.coord-box { min-width: 120px; }
+.accuracy-indicator { padding: 8px 10px; }
+.route-details { gap: 10px; }
+}
 </style>
 </head>
 <body>
 <div class="header">
 <h1>
 <i class="fas fa-map-marked-alt"></i>
-            Addis Ababa Live Tracker
-            Addis Ababa Route Finder
+Addis Ababa Route Finder
 </h1>
 </div>
 
-@@ -308,7 +434,7 @@ <h1>
+<div class="status-bar" id="statusBar">
+<i class="fas fa-satellite"></i> Initializing map...
+</div>
 
 <div id="map"></div>
 
-    <div class="info-panel">
-    <div class="info-panel" id="infoPanel">
+<div class="info-panel" id="infoPanel">
 <div class="coordinates">
 <div class="coord-box">
 <div class="label"><i class="fas fa-map-pin"></i> Latitude</div>
-@@ -324,32 +450,51 @@ <h1>
+<div class="value" id="latitude">--</div>
+</div>
+<div class="coord-box">
+<div class="label"><i class="fas fa-map-pin"></i> Longitude</div>
+<div class="value" id="longitude">--</div>
+</div>
+<div class="accuracy-indicator" id="accuracyBox">
+<div class="accuracy-dot" id="accuracyDot"></div>
+<div><span id="accuracy">--</span> m accuracy</div>
 </div>
 </div>
 
-        <!-- Route Information -->
-        <div class="route-info" id="routeInfo">
-            <div class="route-details">
-                <div class="route-detail">
-                    <div class="label"><i class="fas fa-road"></i> Distance</div>
-                    <div class="value" id="routeDistance">0.0 km</div>
-                </div>
-                <div class="route-detail">
-                    <div class="label"><i class="fas fa-clock"></i> Duration</div>
-                    <div class="value" id="routeTime">0 min</div>
-                </div>
-            </div>
-            <button class="clear-route" onclick="clearRoute()">
-                <i class="fas fa-times"></i> Clear Route
-            </button>
-        </div>
-        
+<!-- Route Information -->
+<div class="route-info" id="routeInfo">
+<div class="route-details">
+<div class="route-detail">
+<div class="label"><i class="fas fa-road"></i> Distance</div>
+<div class="value" id="routeDistance">0.0 km</div>
+</div>
+<div class="route-detail">
+<div class="label"><i class="fas fa-clock"></i> Duration</div>
+<div class="value" id="routeTime">0 min</div>
+</div>
+</div>
+<button class="clear-route" onclick="clearRoute()">
+<i class="fas fa-times"></i> Clear Route
+</button>
+</div>
+
 <div class="error-message" id="errorMessage"></div>
 
 <div class="permission-box" id="permissionBox">
 <i class="fas fa-location-arrow"></i>
 <h3>Location Access Required</h3>
-            <p>Please allow location access to track your position</p>
-            <p>Please allow location access to track your position and find routes</p>
+<p>Please allow location access to track your position and find routes</p>
 <button onclick="requestLocationPermission()">
-                <i class="fas fa-check"></i> Allow Location Access
-                <i class="fas fa-check"></i> Allow Access
+<i class="fas fa-check"></i> Allow Access
 </button>
 </div>
 
@@ -504,42 +486,41 @@ background: #d97706;
 <i class="fas fa-map-pin"></i> Click to Get Location Manually
 </button>
 
-        <div class="places-section">
-        <div class="places-header">
+<div class="places-header">
 <h3>
 <i class="fas fa-building"></i>
 Nearby Places
-                <span style="margin-left: auto; background: #4299e1; color: white; padding: 2px 10px; border-radius: 20px; font-size: 0.8rem;" id="placesCount">0</span>
-                <span class="route-badge" id="routeStatus" style="display: none;">Route Active</span>
+<span class="route-badge" id="routeStatus" style="display: none;">Route Active</span>
 </h3>
-            <div class="places-grid" id="placesGrid">
-                <div style="text-align: center; color: #a0aec0; padding: 20px;">
-                    <i class="fas fa-map-pin" style="font-size: 2rem; margin-bottom: 10px;"></i>
-                    <p>Waiting for location...</p>
-                </div>
-            <span class="places-count" id="placesCount">0</span>
-        </div>
-        
-        <div class="places-grid" id="placesGrid">
-            <div style="text-align: center; color: #a0aec0; padding: 15px;">
-                <i class="fas fa-map-pin" style="font-size: 2rem; margin-bottom: 8px;"></i>
-                <p>Waiting for location...</p>
+<span class="places-count" id="placesCount">0</span>
+</div>
+
+<div class="places-grid" id="placesGrid">
+<div style="text-align: center; color: #a0aec0; padding: 15px;">
+<i class="fas fa-map-pin" style="font-size: 2rem; margin-bottom: 8px;"></i>
+<p>Waiting for location...</p>
 </div>
 </div>
 </div>
-@@ -363,6 +508,7 @@ <h3>
+
+<div class="loading" id="loading">
+<div class="loading-content">
+<i class="fas fa-circle-notch fa-spin"></i>
+<h3 id="loadingMessage">Loading...</h3>
+<p class="small">This may take a few moments</p>
+</div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script>
 // ================== CONFIGURATION ==================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlhkF5ePRPms8ZslUbYhKaWVziWusC6RaQNy5MLbWa1vRhH2hLuDtGgHy4FPx_rT8V/exec';
-@@ -375,13 +521,16 @@ <h3>
+const ADDIS_CENTER = [9.0245, 38.7465]; // Center of Addis Ababa
 
 // ================== GLOBAL VARIABLES ==================
 let map;
-        let routingControl = null;
+let routingControl = null;
 let userMarker = null;
 let accuracyCircle = null;
 let locationMarkers = [];
@@ -547,228 +528,444 @@ let allLocations = [];
 let watchId = null;
 let lastLocation = null;
 let locationAttempts = 0;
-        let selectedPlace = null;
-        let currentRoute = null;
+let selectedPlace = null;
+let currentRoute = null;
 
 // ================== INITIALIZE MAP ==================
 function initMap() {
-@@ -404,6 +553,7 @@ <h3>
+map = L.map('map').setView(ADDIS_CENTER, 13);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+
+updateStatus('Map ready', 'success');
+loadLocationData();
+}
+
+function updateStatus(message, type = 'info') {
+const bar = document.getElementById('statusBar');
+const icon = getStatusIcon(type);
+bar.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+bar.className = 'status-bar ' + type;
+}
+
+function getStatusIcon(type) {
+switch(type) {
 case 'error': return 'exclamation-triangle';
 case 'warning': return 'exclamation-circle';
 case 'success': return 'check-circle';
-                case 'route': return 'route';
+case 'route': return 'route';
 default: return 'satellite';
 }
 }
-@@ -437,6 +587,111 @@ <h3>
+
+function showError(message) {
+const errorEl = document.getElementById('errorMessage');
+errorEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+errorEl.classList.add('show');
+setTimeout(() => errorEl.classList.remove('show'), 5000);
+}
+
+// ================== LOAD LOCATION DATA ==================
+async function loadLocationData() {
+try {
+updateStatus('Loading places...', 'info');
+const response = await fetch(APPS_SCRIPT_URL);
+const data = await response.json();
+allLocations = data;
+updateStatus(`Loaded ${data.length} places`, 'success');
+} catch (error) {
+console.error('Failed to load locations:', error);
+updateStatus('Using offline place data', 'warning');
+// Fallback data
+allLocations = [
+{ siteName: "Meskel Square", latitude: 9.0108, longitude: 38.7615, subCity: "Kirkos" },
+{ siteName: "Bole International Airport", latitude: 8.9779, longitude: 38.7993, subCity: "Bole" },
+{ siteName: "Holy Trinity Cathedral", latitude: 9.0363, longitude: 38.7623, subCity: "Arada" },
+{ siteName: "National Palace", latitude: 9.0308, longitude: 38.7667, subCity: "Arada" },
+{ siteName: "African Union HQ", latitude: 9.0028, longitude: 38.8072, subCity: "Bole" },
+{ siteName: "Entoto Maryam Church", latitude: 9.1039, longitude: 38.7556, subCity: "Gullele" },
+{ siteName: "Mercato Market", latitude: 9.0389, longitude: 38.7469, subCity: "Addis Ketema" },
+{ siteName: "National Museum", latitude: 9.0386, longitude: 38.7619, subCity: "Arada" },
+{ siteName: "Unity Park", latitude: 9.0422, longitude: 38.7592, subCity: "Arada" }
+];
 }
 }
 
-        // ================== ROUTE FUNCTIONS ==================
-        function calculateRoute(destLat, destLng, placeName) {
-            if (!lastLocation) {
-                showError('Please wait for location to be available');
-                return;
-            }
-            
-            // Clear existing route
-            if (routingControl) {
-                map.removeControl(routingControl);
-                routingControl = null;
-            }
-            
-            updateStatus(`Calculating route to ${placeName}...`, 'route');
-            document.getElementById('loading').classList.add('show');
-            document.getElementById('loadingMessage').textContent = 'Calculating route...';
-            
-            // Store selected place
-            selectedPlace = { lat: destLat, lng: destLng, name: placeName };
-            
-            try {
-                // Create routing control
-                routingControl = L.Routing.control({
-                    waypoints: [
-                        L.latLng(lastLocation.lat, lastLocation.lng),
-                        L.latLng(destLat, destLng)
-                    ],
-                    routeWhileDragging: false,
-                    showAlternatives: true,
-                    fitSelectedRoutes: true,
-                    lineOptions: {
-                        styles: [{ color: '#9f7aea', opacity: 0.8, weight: 6 }]
-                    },
-                    router: L.Routing.osrmv1({
-                        serviceUrl: 'https://router.project-osrm.org/route/v1'
-                    }),
-                    createMarker: function() { return null; } // Prevent duplicate markers
-                }).addTo(map);
-                
-                // Show route info panel
-                document.getElementById('infoPanel').classList.add('route-active');
-                document.getElementById('routeInfo').classList.add('show');
-                document.getElementById('routeStatus').style.display = 'inline-block';
-                
-                // Handle route found
-                routingControl.on('routesfound', function(e) {
-                    const routes = e.routes;
-                    const route = routes[0];
-                    
-                    const distance = (route.summary.totalDistance / 1000).toFixed(1);
-                    const time = Math.round(route.summary.totalTime / 60);
-                    
-                    document.getElementById('routeDistance').textContent = distance + ' km';
-                    document.getElementById('routeTime').textContent = time + ' min';
-                    
-                    updateStatus(`Route found: ${distance} km, ${time} min`, 'success');
-                    document.getElementById('loading').classList.remove('show');
-                    
-                    // Highlight selected place
-                    highlightSelectedPlace(placeName);
-                });
-                
-                // Handle routing error
-                routingControl.on('routingerror', function() {
-                    showError('Could not calculate route. Try another location.');
-                    document.getElementById('loading').classList.remove('show');
-                    clearRoute();
-                });
-                
-            } catch (error) {
-                console.error('Route error:', error);
-                showError('Failed to create route');
-                document.getElementById('loading').classList.remove('show');
-            }
-        }
-        
-        function clearRoute() {
-            if (routingControl) {
-                map.removeControl(routingControl);
-                routingControl = null;
-            }
-            
-            document.getElementById('infoPanel').classList.remove('route-active');
-            document.getElementById('routeInfo').classList.remove('show');
-            document.getElementById('routeStatus').style.display = 'none';
-            
-            selectedPlace = null;
-            
-            // Remove highlighting from all place cards
-            document.querySelectorAll('.place-card').forEach(card => {
-                card.classList.remove('selected', 'routing');
-            });
-            
-            updateStatus('Route cleared', 'info');
-        }
-        
-        function highlightSelectedPlace(placeName) {
-            document.querySelectorAll('.place-card').forEach(card => {
-                card.classList.remove('selected', 'routing');
-                if (card.querySelector('.place-name').textContent.includes(placeName)) {
-                    card.classList.add('routing');
-                }
-            });
-        }
-        
+// ================== ROUTE FUNCTIONS ==================
+function calculateRoute(destLat, destLng, placeName) {
+if (!lastLocation) {
+showError('Please wait for location to be available');
+return;
+}
+
+// Clear existing route
+if (routingControl) {
+map.removeControl(routingControl);
+routingControl = null;
+}
+
+updateStatus(`Calculating route to ${placeName}...`, 'route');
+document.getElementById('loading').classList.add('show');
+document.getElementById('loadingMessage').textContent = 'Calculating route...';
+
+// Store selected place
+selectedPlace = { lat: destLat, lng: destLng, name: placeName };
+
+try {
+// Create routing control
+routingControl = L.Routing.control({
+waypoints: [
+L.latLng(lastLocation.lat, lastLocation.lng),
+L.latLng(destLat, destLng)
+],
+routeWhileDragging: false,
+showAlternatives: true,
+fitSelectedRoutes: true,
+lineOptions: {
+styles: [{ color: '#9f7aea', opacity: 0.8, weight: 6 }]
+},
+router: L.Routing.osrmv1({
+serviceUrl: 'https://router.project-osrm.org/route/v1'
+}),
+createMarker: function() { return null; } // Prevent duplicate markers
+}).addTo(map);
+
+// Show route info panel
+document.getElementById('infoPanel').classList.add('route-active');
+document.getElementById('routeInfo').classList.add('show');
+document.getElementById('routeStatus').style.display = 'inline-block';
+
+// Handle route found
+routingControl.on('routesfound', function(e) {
+const routes = e.routes;
+const route = routes[0];
+
+const distance = (route.summary.totalDistance / 1000).toFixed(1);
+const time = Math.round(route.summary.totalTime / 60);
+
+document.getElementById('routeDistance').textContent = distance + ' km';
+document.getElementById('routeTime').textContent = time + ' min';
+
+updateStatus(`Route found: ${distance} km, ${time} min`, 'success');
+document.getElementById('loading').classList.remove('show');
+
+// Highlight selected place
+highlightSelectedPlace(placeName);
+});
+
+// Handle routing error
+routingControl.on('routingerror', function() {
+showError('Could not calculate route. Try another location.');
+document.getElementById('loading').classList.remove('show');
+clearRoute();
+});
+
+} catch (error) {
+console.error('Route error:', error);
+showError('Failed to create route');
+document.getElementById('loading').classList.remove('show');
+}
+}
+
+function clearRoute() {
+if (routingControl) {
+map.removeControl(routingControl);
+routingControl = null;
+}
+
+document.getElementById('infoPanel').classList.remove('route-active');
+document.getElementById('routeInfo').classList.remove('show');
+document.getElementById('routeStatus').style.display = 'none';
+
+selectedPlace = null;
+
+// Remove highlighting from all place cards
+document.querySelectorAll('.place-card').forEach(card => {
+card.classList.remove('selected', 'routing');
+});
+
+updateStatus('Route cleared', 'info');
+}
+
+function highlightSelectedPlace(placeName) {
+document.querySelectorAll('.place-card').forEach(card => {
+card.classList.remove('selected', 'routing');
+if (card.querySelector('.place-name').textContent.includes(placeName)) {
+card.classList.add('routing');
+}
+});
+}
+
 // ================== LOCATION TRACKING ==================
 function checkBrowserSupport() {
 if (!navigator.geolocation) {
-@@ -452,7 +707,6 @@ <h3>
+showError('Geolocation is not supported by your browser');
+document.getElementById('manualLocationBtn').classList.add('show');
+updateStatus('Location not supported', 'error');
+return false;
+}
+return true;
+}
+
+function requestLocationPermission() {
+document.getElementById('permissionBox').classList.remove('show');
 document.getElementById('loading').classList.add('show');
 document.getElementById('loadingMessage').textContent = 'Requesting location permission...';
 
-            // Try to get location
 navigator.geolocation.getCurrentPosition(
 function(position) {
 document.getElementById('loading').classList.remove('show');
-@@ -595,6 +849,11 @@ <h3>
+handleLocationSuccess(position);
+},
+function(error) {
+document.getElementById('loading').classList.remove('show');
+handleLocationError(error);
+},
+{
+enableHighAccuracy: true,
+timeout: 10000,
+maximumAge: 0
+}
+);
+}
+
+function requestLocationManually() {
+if (!checkBrowserSupport()) return;
+
+document.getElementById('manualLocationBtn').classList.remove('show');
+document.getElementById('loading').classList.add('show');
+document.getElementById('loadingMessage').textContent = 'Getting location...';
+
+navigator.geolocation.getCurrentPosition(
+function(position) {
+document.getElementById('loading').classList.remove('show');
+handleLocationSuccess(position);
+},
+function(error) {
+document.getElementById('loading').classList.remove('show');
+handleLocationError(error);
+document.getElementById('manualLocationBtn').classList.add('show');
+},
+{
+enableHighAccuracy: true,
+timeout: 10000,
+maximumAge: 0
+}
+);
+}
+
+function handleLocationSuccess(position) {
+const { latitude, longitude, accuracy } = position.coords;
+
+document.getElementById('latitude').textContent = latitude.toFixed(6);
+document.getElementById('longitude').textContent = longitude.toFixed(6);
+document.getElementById('accuracy').textContent = Math.round(accuracy);
+
+// Update accuracy dot
+const dot = document.getElementById('accuracyDot');
+if (accuracy < 20) dot.className = 'accuracy-dot excellent';
+else if (accuracy < 50) dot.className = 'accuracy-dot good';
+else dot.className = 'accuracy-dot poor';
+
+updateStatus('Location updated', 'success');
+
+// Update or create marker
+if (userMarker) {
+userMarker.setLatLng([latitude, longitude]);
+} else {
+userMarker = L.marker([latitude, longitude], {
+icon: L.divIcon({
+className: 'user-marker',
+html: '<div style="background:#4299e1; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+iconSize: [16, 16]
+})
+}).addTo(map);
+}
+
+// Update accuracy circle
+if (accuracyCircle) {
+accuracyCircle.setLatLng([latitude, longitude]);
+accuracyCircle.setRadius(accuracy);
+} else {
+accuracyCircle = L.circle([latitude, longitude], {
+radius: accuracy,
+color: '#4299e1',
+fillColor: '#4299e1',
+fillOpacity: 0.15,
+weight: 2
+}).addTo(map);
+}
+
+// Center map on first location
+if (!lastLocation) {
+map.setView([latitude, longitude], 15);
+}
+
+const distance = lastLocation ? calculateDistance(lastLocation.lat, lastLocation.lng, latitude, longitude) : Infinity;
+lastLocation = { lat: latitude, lng: longitude };
 
 if (distance > 50) {
-loadNearbyPlaces(lat, lng);
-                    
-                    // If there's an active route, recalculate with new location
-                    if (selectedPlace) {
-                        calculateRoute(selectedPlace.lat, selectedPlace.lng, selectedPlace.name);
-                    }
+loadNearbyPlaces(latitude, longitude);
+
+// If there's an active route, recalculate with new location
+if (selectedPlace) {
+calculateRoute(selectedPlace.lat, selectedPlace.lng, selectedPlace.name);
+}
 }
 }
 
-@@ -639,10 +898,10 @@ <h3>
+function handleLocationError(error) {
+let message = 'Location error: ';
+switch(error.code) {
+case error.PERMISSION_DENIED:
+message = 'Location access denied. Please enable in browser settings.';
+document.getElementById('permissionBox').classList.add('show');
+break;
+case error.POSITION_UNAVAILABLE:
+message = 'Location information unavailable.';
+document.getElementById('manualLocationBtn').classList.add('show');
+break;
+case error.TIMEOUT:
+message = 'Location request timed out.';
+document.getElementById('manualLocationBtn').classList.add('show');
+break;
+default:
+message = 'An unknown error occurred.';
+document.getElementById('manualLocationBtn').classList.add('show');
+}
+showError(message);
+updateStatus('Location failed', 'error');
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+const R = 6371;
+const dLat = (lat2 - lat1) * Math.PI / 180;
+const dLon = (lon2 - lon1) * Math.PI / 180;
+const a = 
+Math.sin(dLat/2) * Math.sin(dLat/2) +
+Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+Math.sin(dLon/2) * Math.sin(dLon/2);
+const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+return R * c;
+}
+
+function loadNearbyPlaces(lat, lng) {
+if (!allLocations.length) return;
+
+const withDistance = allLocations.map(loc => ({
+...loc,
 distance: calculateDistance(lat, lng, loc.latitude, loc.longitude)
 }));
 
-                // Sort and take nearest 10
-                // Sort and take nearest 15
+// Sort and take nearest 15
 const nearest = withDistance
 .sort((a, b) => a.distance - b.distance)
-                    .slice(0, 10);
-                    .slice(0, 15);
+.slice(0, 15);
 
 // Update markers
 locationMarkers.forEach(m => map.removeLayer(m));
-@@ -653,7 +912,11 @@ <h3>
+locationMarkers = [];
+
+nearest.forEach((loc, i) => {
+const marker = L.marker([loc.latitude, loc.longitude], {
+icon: L.divIcon({
+className: 'place-marker',
+html: `<div style="background:#9f7aea; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; font-size:12px; font-weight:bold;">${i+1}</div>`,
+iconSize: [24, 24]
+})
+}).addTo(map);
+
 marker.bindPopup(`
-                       <b>${i+1}. ${loc.siteName}</b><br>
-                       ${loc.subCity || 'Addis Ababa'}<br>
-                        ${loc.distance.toFixed(2)} km away
-                        ${loc.distance.toFixed(2)} km away<br>
-                        <button onclick="calculateRoute(${loc.latitude}, ${loc.longitude}, '${loc.siteName.replace(/'/g, "\\'")}')" 
-                                style="background:#9f7aea; color:white; border:none; padding:5px 10px; border-radius:5px; margin-top:5px; cursor:pointer;">
-                            <i class="fas fa-route"></i> Get Route
-                        </button>
-                   `);
+<b>${i+1}. ${loc.siteName}</b><br>
+${loc.subCity || 'Addis Ababa'}<br>
+${loc.distance.toFixed(2)} km away<br>
+<button onclick="calculateRoute(${loc.latitude}, ${loc.longitude}, '${loc.siteName.replace(/'/g, "\\'")}')" 
+style="background:#9f7aea; color:white; border:none; padding:5px 10px; border-radius:5px; margin-top:5px; cursor:pointer;">
+<i class="fas fa-route"></i> Get Route
+</button>
+`);
 locationMarkers.push(marker);
 });
-@@ -662,10 +925,16 @@ <h3>
+
+// Update places grid
 const grid = document.getElementById('placesGrid');
 if (nearest.length > 0) {
 grid.innerHTML = nearest.map((loc, i) => `
-                        <div class="place-card">
-                            <div class="place-name">${i+1}. ${loc.siteName}</div>
-                            <div class="place-distance">${loc.distance.toFixed(2)} km</div>
-                            <div style="color: #718096; font-size: 0.8rem;">${loc.subCity || 'Addis Ababa'}</div>
-                        <div class="place-card ${selectedPlace && selectedPlace.name === loc.siteName ? 'selected' : ''}" 
-                             onclick="calculateRoute(${loc.latitude}, ${loc.longitude}, '${loc.siteName.replace(/'/g, "\\'")}')">
-                            <span class="place-rank">${i+1}</span>
-                            <div class="place-name">${loc.siteName}</div>
-                            <div class="place-distance">
-                                <i class="fas fa-location-arrow"></i> ${loc.distance.toFixed(2)} km
-                            </div>
-                            <div class="place-subcity">
-                                <i class="fas fa-map-pin"></i> ${loc.subCity || 'Addis Ababa'}
-                            </div>
-                       </div>
-                   `).join('');
+<div class="place-card ${selectedPlace && selectedPlace.name === loc.siteName ? 'selected' : ''}" 
+onclick="calculateRoute(${loc.latitude}, ${loc.longitude}, '${loc.siteName.replace(/'/g, "\\'")}')">
+<span class="place-rank">${i+1}</span>
+<div class="place-name">${loc.siteName}</div>
+<div class="place-distance">
+<i class="fas fa-location-arrow"></i> ${loc.distance.toFixed(2)} km
+</div>
+<div class="place-subcity">
+<i class="fas fa-map-pin"></i> ${loc.subCity || 'Addis Ababa'}
+</div>
+</div>
+`).join('');
+} else {
+grid.innerHTML = '<div style="text-align: center; color: #a0aec0; padding: 20px;">No places found nearby</div>';
 }
-@@ -699,10 +968,8 @@ <h3>
+
+document.getElementById('placesCount').textContent = nearest.length;
+}
+
+function startLocationTracking() {
+if (!checkBrowserSupport()) return;
+
+updateStatus('Requesting location...', 'info');
+
+watchId = navigator.geolocation.watchPosition(
+handleLocationSuccess,
+handleLocationError,
+{
+enableHighAccuracy: true,
+timeout: 10000,
+maximumAge: 0
+}
+);
+}
+
+// ================== INITIALIZATION ==================
+window.onload = function() {
+initMap();
+
+// Check if we're on localhost or HTTPS
+const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 const isHttps = location.protocol === 'https:';
 
 if (isLocalhost || isHttps) {
-                // Start tracking automatically
 startLocationTracking();
 } else {
-                // Show HTTPS warning but still try
 updateStatus('For best results, use HTTPS', 'warning');
 startLocationTracking();
 }
-@@ -713,8 +980,6 @@ <h3>
+
+// Check permission status if available
+if (navigator.permissions && navigator.permissions.query) {
+navigator.permissions.query({ name: 'geolocation' }).then(result => {
 if (result.state === 'denied') {
 document.getElementById('permissionBox').classList.add('show');
 updateStatus('Location permission denied', 'error');
-                    } else if (result.state === 'prompt') {
-                        // Will prompt automatically
 }
 });
 }
-@@ -726,6 +991,12 @@ <h3>
+};
+
+// Cleanup on page unload
+window.onbeforeunload = function() {
+if (watchId) {
 navigator.geolocation.clearWatch(watchId);
 }
 };
-        
-        // Make functions global
-        window.calculateRoute = calculateRoute;
-        window.clearRoute = clearRoute;
-        window.requestLocationPermission = requestLocationPermission;
-        window.requestLocationManually = requestLocationManually;
+
+// Make functions global
+window.calculateRoute = calculateRoute;
+window.clearRoute = clearRoute;
+window.requestLocationPermission = requestLocationPermission;
+window.requestLocationManually = requestLocationManually;
 </script>
 </body>
 </html>
